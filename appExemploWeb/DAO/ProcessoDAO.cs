@@ -20,7 +20,6 @@ namespace appExemploWeb.DAO
 
                 // Buscando e abrindo a Conexão com o Banco de Dados
                 using var con = _conexao.GetConnection();
-                con.Open();
 
                 string sql = "SELECT * FROM processos;";
                 using var comando = con.CreateCommand();

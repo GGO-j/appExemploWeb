@@ -23,33 +23,37 @@
                     <th>Interessado</th>
                     <th>Assunto</th>
                     <th>Situação</th>
-                    <th>Ações</th>
                     <th>Quantidade de Gatos</th>
+                    <th>Ações</th>
                 </tr>
 
             </thead>
 
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>2026/0001</td>
-                    <td>João Guariento</td>
-                    <td class="text-truncate">Solicitação de Isenção de IPTU</td>
-                    <td>
-                        <i class="bi bi-clock"></i>Pendente
-                    </td>
-                    <td class="text-end">
-                        <div class="btn-group btn-group-sm">
-                            <a href="#" class="btn btn-light border text-primary" title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a href="#" class="btn btn-light border text-danger" title="Excluir">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </div>
-                    </td>
-                    <td>52 Gatos</td>
-                </tr>
+
+                @foreach (var p in processos)
+                {
+                    <tr>
+                        <td>@p.Id</td>
+                        <td>@p.Numero</td>
+                        <td>@p.Interessado</td>
+                        <td class="text-truncate">@p.Assunto</td>
+                        <td>
+                            <i class="bi bi-clock"></i>@p.Situacao
+                        </td>
+                        <td>52 Gatos</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="#" class="btn btn-light border text-primary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="#" class="btn btn-light border text-danger" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
             </tbody>
 
         </table>
@@ -58,5 +62,15 @@
 </div>
 
 @code {
+    private List<Processo>? processos;
 
+    protected override void OnInitialized()
+    {
+        CarregarProcessos();
+    }
+
+    private void CarregarProcessos()
+    {
+        processos = dao.Listar();
+    }
 }
