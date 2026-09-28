@@ -1,5 +1,7 @@
 ﻿using appExemploWeb.Configs;
 using appExemploWeb.Models;
+using AppWebExemplo.Configs;
+using MySql.Data.MySqlClient;
 
 namespace appExemploWeb.DAO
 {
@@ -14,39 +16,33 @@ namespace appExemploWeb.DAO
 
         public List<Processo> Listar()
         {
-            try
+            var lista = new List<Processo>();
+
+            using var con = _conexao.GetConnection();
+            using var comando = con.CreateCommand();
+            comando.CommandText = "SELECT * FROM processos;";
+
+            using var leitor = (MySqlDataReader)comando.ExecuteReader();
+
+            while (leitor.Read())
             {
-                var lista = new List<Processo>();
-
-                // Buscando e abrindo a Conexão com o Banco de Dados
-                using var con = _conexao.GetConnection();
-
-                string sql = "SELECT * FROM processos;";
-                using var comando = con.CreateCommand();
-                comando.CommandText = sql;
-
-                using var leitor = comando.ExecuteReader();
-
-                while (leitor.Read())
-                {
-                    var processo = new Processo();
-                    processo.Id = leitor.GetInt32("id_pro");
-                    processo.Numero = leitor.GetString("numero_pro");
-                    processo.Interessado = leitor.GetString("interessado_pro");
-                    processo.Assunto = leitor.GetString("assunto_pro");
-                    processo.Descricao = leitor.GetString("descricao_pro");
-                    processo.Situacao = leitor.GetString("situacao_pro");
-
-                    //processo.Data = leitor["data_pro"];
-
-                    lista.Add(processo);
-                }
-
-                return lista;
-            }catch
-            {
-                throw;
+                lista.Add(MapearProcesso(leitor));
             }
+
+            return lista;
+        }
+
+        private static Processo MapearProcesso(MySqlDataReader leitor)
+        {
+            return new Processo
+            {
+                Id = leitor.GetInt32("id_pro"),
+                Numero = DAOHelper.GetString(leitor, "numero_pro"),
+                Interessado = DAOHelper.GetString(leitor, "interessado_pro"),
+                Assunto = DAOHelper.GetString(leitor, "assunto_pro"),
+                Descricao = DAOHelper.GetString(leitor, "descricao_pro"),
+                Situacao = DAOHelper.GetString(leitor, "situacao_pro")
+            };
         }
     }
 }

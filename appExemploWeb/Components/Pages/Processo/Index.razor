@@ -1,10 +1,12 @@
 ﻿@page "/processos"
+@using appExemploWeb.Models
+@using appExemploWeb.DAO
 @rendermode InteractiveServer
-@inject ProcessoDAO dao;
+@inject ProcessoDAO ProcessoDAO
 
 <PageTitle>Processos - Sistema de Controle de Processos</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-4"> 
+<div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="fw-bold mb-1">Consulta de Processos</h2>
     </div>
@@ -12,52 +14,51 @@
 
 <div class="custom-table-card">
     <div class="table-responsive">
-
-        <table class="table align-middle">
-
-            <thead>
-
-                <tr>
-                    <th>ID</th>
-                    <th>Número</th>
-                    <th>Interessado</th>
-                    <th>Assunto</th>
-                    <th>Situação</th>
-                    <th>Quantidade de Gatos</th>
-                    <th>Ações</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                @foreach (var p in processos)
-                {
+        @if (processos == null)
+        {
+            <p class="p-3 text-muted">Carregando processos...</p>
+        }
+        else if (!processos.Any())
+        {
+            <p class="p-3 text-muted">Nenhum processo encontrado.</p>
+        }
+        else
+        {
+            <table class="table align-middle">
+                <thead>
                     <tr>
-                        <td>@p.Id</td>
-                        <td>@p.Numero</td>
-                        <td>@p.Interessado</td>
-                        <td class="text-truncate">@p.Assunto</td>
-                        <td>
-                            <i class="bi bi-clock"></i>@p.Situacao
-                        </td>
-                        <td>52 Gatos</td>
-                        <td class="text-end">
-                            <div class="btn-group btn-group-sm">
-                                <a href="#" class="btn btn-light border text-primary" title="Editar">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="#" class="btn btn-light border text-danger" title="Excluir">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </div>
-                        </td>
+                        <th>ID</th>
+                        <th>Número</th>
+                        <th>Interessado</th>
+                        <th>Assunto</th>
+                        <th>Situação</th>
+                        <th class="text-end">Ações</th>
                     </tr>
-                }
-            </tbody>
-
-        </table>
-
+                </thead>
+                <tbody>
+                    @foreach (var processo in processos)
+                    {
+                        <tr>
+                            <td>@processo.Id</td>
+                            <td>@processo.Numero</td>
+                            <td>@processo.Interessado</td>
+                            <td>@processo.Assunto</td>
+                            <td>@processo.Situacao</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="#" class="btn btn-light border text-primary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-light border text-danger" title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 </div>
 
@@ -66,11 +67,7 @@
 
     protected override void OnInitialized()
     {
-        CarregarProcessos();
-    }
-
-    private void CarregarProcessos()
-    {
-        processos = dao.Listar();
+        // Chama o DAO para buscar os dados no banco ao inicializar a página
+        processos = ProcessoDAO.Listar();
     }
 }
