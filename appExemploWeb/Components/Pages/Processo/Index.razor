@@ -1,5 +1,5 @@
 ﻿@page "/processos"
-@using appExemploWeb.Models
+@using AppWebExemplo.Model
 @using appExemploWeb.DAO
 @rendermode InteractiveServer
 @inject ProcessoDAO ProcessoDAO
@@ -9,6 +9,11 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="fw-bold mb-1">Consulta de Processos</h2>
+    </div>
+    <div>
+        <a href="/processos/cadastro" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Novo Processo
+        </a>
     </div>
 </div>
 
