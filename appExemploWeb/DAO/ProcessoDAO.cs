@@ -76,6 +76,70 @@ namespace appExemploWeb.DAO
             return lista;
         }
 
+        public Processo? ObterPorId(int id)
+        {
+            using var con = _conexao.GetConnection();
+            const string sql = @"SELECT id_pro, numero_pro, data_pro, interessado_pro,
+                                        assunto_pro, descricao_pro, situacao_pro
+                                 FROM processos
+                                 WHERE id_pro = @id";
+
+            using var comando = con.CreateCommand();
+            comando.CommandText = sql;
+            comando.Parameters.AddWithValue("@id", id);
+
+            using var reader = comando.ExecuteReader();
+            if (!reader.Read())
+            {
+                return null;
+            }
+
+            int ordinalId = reader.GetOrdinal("id_pro");
+            int ordinalNumero = reader.GetOrdinal("numero_pro");
+            int ordinalData = reader.GetOrdinal("data_pro");
+            int ordinalInteressado = reader.GetOrdinal("interessado_pro");
+            int ordinalAssunto = reader.GetOrdinal("assunto_pro");
+            int ordinalDescricao = reader.GetOrdinal("descricao_pro");
+            int ordinalSituacao = reader.GetOrdinal("situacao_pro");
+
+            return new Processo
+            {
+                Id = reader.GetInt32(ordinalId),
+                Numero = reader.IsDBNull(ordinalNumero) ? string.Empty : reader.GetString(ordinalNumero),
+                Data = reader.IsDBNull(ordinalData) ? null : DateOnly.FromDateTime(reader.GetDateTime(ordinalData)),
+                Interessado = reader.IsDBNull(ordinalInteressado) ? string.Empty : reader.GetString(ordinalInteressado),
+                Assunto = reader.IsDBNull(ordinalAssunto) ? string.Empty : reader.GetString(ordinalAssunto),
+                Descricao = reader.IsDBNull(ordinalDescricao) ? string.Empty : reader.GetString(ordinalDescricao),
+                Situacao = reader.IsDBNull(ordinalSituacao) ? "Aberto" : reader.GetString(ordinalSituacao)
+            };
+        }
+
+        public void Atualizar(Processo processo)
+        {
+            using var con = _conexao.GetConnection();
+            const string sql = @"UPDATE processos
+                                 SET numero_pro = @numero,
+                                     data_pro = @data,
+                                     interessado_pro = @interessado,
+                                     assunto_pro = @assunto,
+                                     descricao_pro = @descricao,
+                                     situacao_pro = @situacao
+                                 WHERE id_pro = @id";
+
+            using var comando = con.CreateCommand();
+            comando.CommandText = sql;
+            comando.Parameters.AddWithValue("@numero", processo.Numero ?? string.Empty);
+            comando.Parameters.AddWithValue("@data", processo.Data.HasValue
+                ? processo.Data.Value.ToDateTime(TimeOnly.MinValue)
+                : DBNull.Value);
+            comando.Parameters.AddWithValue("@interessado", processo.Interessado ?? string.Empty);
+            comando.Parameters.AddWithValue("@assunto", processo.Assunto ?? string.Empty);
+            comando.Parameters.AddWithValue("@descricao", processo.Descricao ?? string.Empty);
+            comando.Parameters.AddWithValue("@situacao", processo.Situacao ?? "Aberto");
+            comando.Parameters.AddWithValue("@id", processo.Id);
+            comando.ExecuteNonQuery();
+        }
+
         public void Inserir(Processo processo)
         {
             using var con = _conexao.GetConnection();

@@ -51,7 +51,7 @@
                             <td>@processo.Situacao</td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="#" class="btn btn-light border text-primary" title="Editar">
+                                    <a href="@($"/processos/editar/{processo.Id}")" class="btn btn-light border text-primary" title="Editar" aria-label="Editar processo @processo.Id">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     <a href="#" class="btn btn-light border text-danger" title="Excluir">

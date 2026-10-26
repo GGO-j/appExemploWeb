@@ -1,18 +1,28 @@
 ﻿@page "/processos/cadastro"
+@page "/processos/editar/{Id:int}"
 @using AppWebExemplo.Model
 @using appExemploWeb.DAO
 @rendermode InteractiveServer
 @inject ProcessoDAO dao
 @inject NavigationManager NavigationManager
 
-<PageTitle>Novo Processo - Sistema de Controle de Processos</PageTitle>
+<PageTitle>@Titulo - Sistema de Controle de Processos</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="fw-bold mb-1">Cadastro de Processo</h2>
+        <h2 class="fw-bold mb-1">@Titulo</h2>
     </div>
 </div>
 
+@if (Id.HasValue && !processoEncontrado)
+{
+    <div class="alert alert-warning" role="alert">
+        Processo não encontrado.
+        <a href="/processos" class="alert-link">Voltar para a lista</a>
+    </div>
+}
+else
+{
 <div class="custom-table-card p-4">
     <EditForm Model="processo" OnValidSubmit="Salvar" FormName="formCadastroProcesso">
         <DataAnnotationsValidator />
@@ -70,26 +80,52 @@
 
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary">
-                <i class="bi bi-check-lg"></i> Salvar
+                <i class="bi bi-check-lg"></i> @(Id.HasValue ? "Atualizar" : "Salvar")
             </button>
             <a href="/processos" class="btn btn-light border">Cancelar</a>
         </div>
     </EditForm>
 </div>
+}
 
 @code {
     [SupplyParameterFromForm]
     private Processo processo { get; set; } = new();
 
-    protected override void OnInitialized()
+    [Parameter]
+    public int? Id { get; set; }
+
+    private bool processoEncontrado = true;
+    private string Titulo => Id.HasValue ? "Editar Processo" : "Cadastro de Processo";
+
+    protected override void OnParametersSet()
     {
-        // Define a data atual como padrão se for um novo registro
-        processo.Data ??= DateOnly.FromDateTime(DateTime.Now);
+        if (!Id.HasValue)
+        {
+            processo = new Processo { Data = DateOnly.FromDateTime(DateTime.Now) };
+            processoEncontrado = true;
+            return;
+        }
+
+        var processoCarregado = dao.ObterPorId(Id.Value);
+        processoEncontrado = processoCarregado is not null;
+        if (processoCarregado is not null)
+        {
+            processo = processoCarregado;
+        }
     }
 
     private void Salvar()
     {
-        dao.Inserir(processo);
+        if (Id.HasValue)
+        {
+            dao.Atualizar(processo);
+        }
+        else
+        {
+            dao.Inserir(processo);
+        }
+
         NavigationManager.NavigateTo("/processos");
     }
 }
