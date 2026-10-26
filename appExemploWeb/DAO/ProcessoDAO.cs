@@ -1,4 +1,5 @@
 ﻿using appExemploWeb.Configs;
+using AppWebExemplo.Configs;
 using AppWebExemplo.Model;
 using System.Data;
 
@@ -38,37 +39,18 @@ namespace appExemploWeb.DAO
                 // Leitura do ID (Geralmente nunca é nulo)
                 processo.Id = reader.GetInt32(reader.GetOrdinal("id_pro"));
 
-                // Leitura de Strings tratando NULO
-                processo.Numero = reader.IsDBNull(reader.GetOrdinal("numero_pro"))
-                    ? string.Empty
-                    : reader.GetString(reader.GetOrdinal("numero_pro"));
-
-                processo.Interessado = reader.IsDBNull(reader.GetOrdinal("interessado_pro"))
-                    ? string.Empty
-                    : reader.GetString(reader.GetOrdinal("interessado_pro"));
-
-                processo.Assunto = reader.IsDBNull(reader.GetOrdinal("assunto_pro"))
-                    ? string.Empty
-                    : reader.GetString(reader.GetOrdinal("assunto_pro"));
-
-                processo.Descricao = reader.IsDBNull(reader.GetOrdinal("descricao_pro"))
-                    ? string.Empty
-                    : reader.GetString(reader.GetOrdinal("descricao_pro"));
-
-                processo.Situacao = reader.IsDBNull(reader.GetOrdinal("situacao_pro"))
+                processo.Numero = DAOHelper.GetString(reader, "numero_pro");
+                processo.Interessado = DAOHelper.GetString(reader, "interessado_pro");
+                processo.Assunto = DAOHelper.GetString(reader, "assunto_pro");
+                processo.Descricao = DAOHelper.GetString(reader, "descricao_pro");
+                processo.Situacao = DAOHelper.IsNull(reader, "situacao_pro")
                     ? "Aberto"
-                    : reader.GetString(reader.GetOrdinal("situacao_pro"));
+                    : DAOHelper.GetString(reader, "situacao_pro");
 
-                // Leitura de Data tratando NULO
-                if (!reader.IsDBNull(reader.GetOrdinal("data_pro")))
-                {
-                    DateTime dataBanco = reader.GetDateTime(reader.GetOrdinal("data_pro"));
-                    processo.Data = DateOnly.FromDateTime(dataBanco);
-                }
-                else
-                {
-                    processo.Data = null;
-                }
+                DateTime? dataBanco = DAOHelper.GetDateTime(reader, "data_pro");
+                processo.Data = dataBanco.HasValue
+                    ? DateOnly.FromDateTime(dataBanco.Value)
+                    : null;
 
                 lista.Add(processo);
             }
@@ -94,23 +76,19 @@ namespace appExemploWeb.DAO
                 return null;
             }
 
-            int ordinalId = reader.GetOrdinal("id_pro");
-            int ordinalNumero = reader.GetOrdinal("numero_pro");
-            int ordinalData = reader.GetOrdinal("data_pro");
-            int ordinalInteressado = reader.GetOrdinal("interessado_pro");
-            int ordinalAssunto = reader.GetOrdinal("assunto_pro");
-            int ordinalDescricao = reader.GetOrdinal("descricao_pro");
-            int ordinalSituacao = reader.GetOrdinal("situacao_pro");
+            DateTime? dataBanco = DAOHelper.GetDateTime(reader, "data_pro");
 
             return new Processo
             {
-                Id = reader.GetInt32(ordinalId),
-                Numero = reader.IsDBNull(ordinalNumero) ? string.Empty : reader.GetString(ordinalNumero),
-                Data = reader.IsDBNull(ordinalData) ? null : DateOnly.FromDateTime(reader.GetDateTime(ordinalData)),
-                Interessado = reader.IsDBNull(ordinalInteressado) ? string.Empty : reader.GetString(ordinalInteressado),
-                Assunto = reader.IsDBNull(ordinalAssunto) ? string.Empty : reader.GetString(ordinalAssunto),
-                Descricao = reader.IsDBNull(ordinalDescricao) ? string.Empty : reader.GetString(ordinalDescricao),
-                Situacao = reader.IsDBNull(ordinalSituacao) ? "Aberto" : reader.GetString(ordinalSituacao)
+                Id = reader.GetInt32(reader.GetOrdinal("id_pro")),
+                Numero = DAOHelper.GetString(reader, "numero_pro"),
+                Data = dataBanco.HasValue ? DateOnly.FromDateTime(dataBanco.Value) : null,
+                Interessado = DAOHelper.GetString(reader, "interessado_pro"),
+                Assunto = DAOHelper.GetString(reader, "assunto_pro"),
+                Descricao = DAOHelper.GetString(reader, "descricao_pro"),
+                Situacao = DAOHelper.IsNull(reader, "situacao_pro")
+                    ? "Aberto"
+                    : DAOHelper.GetString(reader, "situacao_pro")
             };
         }
 
